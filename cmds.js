@@ -2,8 +2,17 @@
 
 const {log, biglog, errorlog, colorize} = require("./out");
 
-const model = require('./model');
+const Sequelize = require('sequelize');
+const options = { logging: false, operatorsAliases: false};
+const sequelize = new Sequelize("sqlite:quizzes.sqlite",options);
 
+const quizzes = sequelize.define(
+  'quizzes',
+  {
+    question: Sequelize.STRING,
+    answer: Sequelize.STRING
+  }
+);
 
 /**
  * Muestra la ayuda.
@@ -32,10 +41,18 @@ exports.helpCmd = rl => {
  * @param rl Objeto readline usado para implementar el CLI.
  */
 exports.listCmd = rl => {
-    model.getAll().forEach((quiz, id) => {
-        log(` [${colorize(id, 'magenta')}]:  ${quiz.question}`);
-    });
+  try{
+    quizzes.findAll()
+    .then( quizzes =>
+      quizzes.forEach( q => console.log(q.get({plain: true})))
+    )
+    .catch( (error) => console.log(error));
     rl.prompt();
+  }catch(error) {
+      errorlog(error.message);
+      rl.prompt();
+  }
+
 };
 
 
@@ -189,4 +206,3 @@ exports.creditsCmd = rl => {
 exports.quitCmd = rl => {
     rl.close();
 };
-

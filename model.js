@@ -6,6 +6,11 @@ const fs = require("fs");
 const DB_FILENAME = "quizzes.json";
 
 
+
+const Sequelize = require('sequelize');
+const options = { logging: false, operatorsAliases: false};
+const sequelize = new Sequelize("sqlite:quizzes.sqlite",options);
+
 // Modelo de datos.
 //
 // En esta variable se mantienen todos los quizzes existentes.
@@ -33,6 +38,41 @@ let quizzes = [
         answer: "Lisboa"
     }
 ];
+
+const quiz = sequelize.define(
+  'quizzes',
+  {
+    question: Sequelize.STRING,
+    answer: Sequelize.STRING
+  }
+);
+
+sequelize.sync()
+.then(() => quiz.count())
+.then((count) => {
+  if(count===0){
+    quizzes.bulkCreate([
+        {
+            question: "Capital de Italia",
+            answer: "Roma"
+        },
+        {
+            question: "Capital de Francia",
+            answer: "París"
+        },
+        {
+            question: "Capital de España",
+            answer: "Madrid"
+        },
+        {
+            question: "Capital de Portugal",
+            answer: "Lisboa"
+        }
+    ])
+  }
+})
+
+//module.exports = sequelize;
 
 
 /**
@@ -180,5 +220,3 @@ exports.deleteByIndex = id => {
 
 // Carga los quizzes almacenados en el fichero.
 load();
-
-
